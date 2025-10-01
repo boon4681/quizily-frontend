@@ -130,9 +130,11 @@
                 <div class="flex items-center pt-3">
                     <div class="mr-auto">
                         <div
-                            class="border rounded-md px-4 py-1 cursor-not-allowed text-neutral-400 text-sm h-9 items-center flex"
+                            class="border rounded-md px-4 py-1 cursor-not-allowed text-sm h-9 items-center flex"
                         >
-                            {getTypeName(activeQuestion.type)}
+                            <span class="text-neutral-500">
+                                {getTypeName(activeQuestion.type)}
+                            </span>
                         </div>
                     </div>
                     {#if activeQuestion.type == "multiple"}
@@ -143,10 +145,12 @@
                     bind:value={questions[activeQuestionIndex]!.correct}
                     disabled
                 >
-                    <Dnd
-                        {...dndOptions}
-                        bind:data={questions[activeQuestionIndex]!.choices}
-                    ></Dnd>
+                    {#key activeQuestion.id}
+                        <Dnd
+                            {...dndOptions}
+                            bind:data={questions[activeQuestionIndex]!.choices}
+                        ></Dnd>
+                    {/key}
                     {#if activeQuestion.choices.length == 0}
                         <div class="text-neutral-400 text-sm text-center">
                             This question has no choices
@@ -175,7 +179,8 @@
             size="icon"
             variant="ghost"
             class="text-red-500"
-            disabled={id == activeQuestion.correct}
+            disabled={id == activeQuestion.correct ||
+                activeQuestion.type == "binary"}
             onclick={() => {
                 questions[activeQuestionIndex].choices = [
                     ...questions[activeQuestionIndex].choices.filter(
@@ -203,7 +208,7 @@
     <DropdownMenu.Group>
         {#if activeQuestion.type == "multiple"}
             <DropdownMenu.Item
-                onclick={() => {
+                onSelect={() => {
                     edit_choice_index = activeQuestion.choices.findIndex(
                         (a) => a.id == id,
                     );
@@ -216,8 +221,9 @@
             </DropdownMenu.Item>
         {/if}
         <DropdownMenu.Item
+            closeOnSelect
             disabled={id == activeQuestion.correct}
-            onclick={() => {
+            onSelect={() => {
                 questions[activeQuestionIndex]!.correct = id;
             }}
         >
