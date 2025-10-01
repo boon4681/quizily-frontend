@@ -1,3 +1,4 @@
+import type { QuestionType } from "$lib/utils/index";
 
 
 export interface QuestionChoice {
@@ -7,6 +8,7 @@ export interface QuestionChoice {
 
 export interface Question {
     id: string;
+    type: QuestionType;
     title: string;
     choices: QuestionChoice[];
     correct: string;

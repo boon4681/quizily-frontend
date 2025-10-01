@@ -11,17 +11,21 @@
     import { dnd, Dnd } from "$lib/components/main/dnd";
     import { createId } from "@paralleldrive/cuid2";
     import Trash2 from "@lucide/svelte/icons/trash-2";
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import { watch } from "runed";
     import Button, {
         buttonVariants,
     } from "$lib/components/ui/button/button.svelte";
     import Plus from "@lucide/svelte/icons/plus";
+    import EllipsisVertical from "@lucide/svelte/icons/ellipsis-vertical";
     import * as Dialog from "$lib/components/ui/dialog/index.js";
     import { Input } from "$lib/components/ui/input";
+    import { getTypeName } from "$lib/utils/get-type-name";
 
     let questions = $state<Question[]>([
         {
             id: "0",
+            type: "multiple",
             title: "What does UI stand for in the context of design?",
             choices: [
                 {
@@ -45,6 +49,7 @@
         },
         {
             id: "1",
+            type: "binary",
             title: "Provide Topic and Upload your document",
             choices: [],
             correct: "",
@@ -68,10 +73,34 @@
     let new_choice_text = $state<string>("");
     let new_choice_open = $state<boolean>(false);
 
+    let edit_choice_open = $state<boolean>(false);
+    let edit_choice_text = $state<string>("");
+    let edit_choice_index = $state<number>();
+
     watch(
         () => dndOptions.data,
         () => {
             console.log(dndOptions.data);
+        },
+    );
+    watch(
+        () => activeQuestion.type,
+        () => {
+            if (
+                activeQuestion.type == "binary" &&
+                activeQuestion.choices.length == 0
+            ) {
+                questions[activeQuestionIndex].choices = [
+                    {
+                        id: createId(),
+                        text: "True",
+                    },
+                    {
+                        id: createId(),
+                        text: "False",
+                    },
+                ];
+            }
         },
     );
 </script>
@@ -98,21 +127,37 @@
                     bind:value={questions[activeQuestionIndex]!.title}
                     class="p-4 bg-neutral-200 rounded-md h-20"
                 ></Textarea>
-                <div class="flex justify-end pt-3">
-                    {@render add_choice_snippet()}
+                <div class="flex items-center pt-3">
+                    <div class="mr-auto">
+                        <div
+                            class="border rounded-md px-4 py-1 cursor-not-allowed text-neutral-400 text-sm h-9 items-center flex"
+                        >
+                            {getTypeName(activeQuestion.type)}
+                        </div>
+                    </div>
+                    {#if activeQuestion.type == "multiple"}
+                        {@render add_choice_snippet()}
+                    {/if}
                 </div>
                 <RadioGroup.Root
                     bind:value={questions[activeQuestionIndex]!.correct}
+                    disabled
                 >
                     <Dnd
                         {...dndOptions}
                         bind:data={questions[activeQuestionIndex]!.choices}
                     ></Dnd>
+                    {#if activeQuestion.choices.length == 0}
+                        <div class="text-neutral-400 text-sm text-center">
+                            This question has no choices
+                        </div>
+                    {/if}
                 </RadioGroup.Root>
             </Card>
         {/if}
     </div>
 </QuizLayout>
+{@render edit_choice()}
 
 {#snippet choice({ id, text }: QuestionChoice)}
     <div class="flex w-full items-center">
@@ -130,15 +175,55 @@
             size="icon"
             variant="ghost"
             class="text-red-500"
+            disabled={id == activeQuestion.correct}
             onclick={() => {
-                questions[activeQuestionIndex].choices = [...questions[
-                    activeQuestionIndex
-                ].choices.filter((a) => a.id != id)];
+                questions[activeQuestionIndex].choices = [
+                    ...questions[activeQuestionIndex].choices.filter(
+                        (a) => a.id != id,
+                    ),
+                ];
             }}
         >
             <Trash2></Trash2>
         </Button>
+        <DropdownMenu.Root>
+            <DropdownMenu.Trigger
+                class={buttonVariants({ variant: "ghost", size: "icon" })}
+            >
+                <EllipsisVertical></EllipsisVertical>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content>
+                {@render choice_menu({ id, text })}
+            </DropdownMenu.Content>
+        </DropdownMenu.Root>
     </div>
+{/snippet}
+
+{#snippet choice_menu({ id, text }: QuestionChoice)}
+    <DropdownMenu.Group>
+        {#if activeQuestion.type == "multiple"}
+            <DropdownMenu.Item
+                onclick={() => {
+                    edit_choice_index = activeQuestion.choices.findIndex(
+                        (a) => a.id == id,
+                    );
+                    edit_choice_text =
+                        activeQuestion.choices[edit_choice_index].text;
+                    edit_choice_open = true;
+                }}
+            >
+                Edit
+            </DropdownMenu.Item>
+        {/if}
+        <DropdownMenu.Item
+            disabled={id == activeQuestion.correct}
+            onclick={() => {
+                questions[activeQuestionIndex]!.correct = id;
+            }}
+        >
+            Mark as Answer
+        </DropdownMenu.Item>
+    </DropdownMenu.Group>
 {/snippet}
 
 {#snippet add_choice_snippet()}
@@ -180,6 +265,52 @@
                     }}
                 >
                     Add
+                </Button>
+            </Dialog.Footer>
+        </Dialog.Content>
+    </Dialog.Root>
+{/snippet}
+
+{#snippet edit_choice()}
+    <Dialog.Root
+        bind:open={edit_choice_open}
+        onOpenChange={(e) => {
+            if (!e) {
+                edit_choice_text = "";
+                edit_choice_index = undefined;
+            }
+        }}
+    >
+        <Dialog.Content class="sm:max-w-[425px]">
+            <Dialog.Header>
+                <Dialog.Title>Edit choice</Dialog.Title>
+                <Dialog.Description>
+                    Editing current choice of the question.
+                </Dialog.Description>
+            </Dialog.Header>
+            <div class="grid gap-4 py-4">
+                <div class="grid grid-cols-4 items-center gap-4">
+                    <Label for="choice.text" class="text-right">Choice</Label>
+                    <Input
+                        id="choice.text"
+                        bind:value={edit_choice_text}
+                        class="col-span-3"
+                    />
+                </div>
+            </div>
+            <Dialog.Footer>
+                <Button
+                    disabled={edit_choice_text?.trim().length == 0 ||
+                        edit_choice_text ==
+                            activeQuestion.choices[edit_choice_index!].text}
+                    onclick={() => {
+                        questions[activeQuestionIndex].choices[
+                            edit_choice_index!
+                        ].text = edit_choice_text;
+                        edit_choice_open = false;
+                    }}
+                >
+                    Save
                 </Button>
             </Dialog.Footer>
         </Dialog.Content>
