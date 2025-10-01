@@ -207,6 +207,51 @@
   resolved "https://registry.yarnpkg.com/@dicebear/thumbs/-/thumbs-9.2.4.tgz#c94c0b9e9bb6c0cfa039bce17163243564ddd969"
   integrity sha512-EL4sMqv9p2+1Xy3d8e8UxyeKZV2+cgt3X2x2RTRzEOIIhobtkL8u6lJxmJbiGbpVtVALmrt5e7gjmwqpryYDpg==
 
+"@dnd-kit/abstract@^0.1.21":
+  version "0.1.21"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/abstract/-/abstract-0.1.21.tgz#9cd02674b5946cb2a128bee650c3c72dc840ca7e"
+  integrity sha512-6sJut6/D21xPIK8EFMu+JJeF+fBCOmQKN1BRpeUYFi5m9P1CJpTYbBwfI107h7PHObI6a5bsckiKkRpF2orHpw==
+  dependencies:
+    "@dnd-kit/geometry" "^0.1.21"
+    "@dnd-kit/state" "^0.1.21"
+    tslib "^2.6.2"
+
+"@dnd-kit/collision@^0.1.21":
+  version "0.1.21"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/collision/-/collision-0.1.21.tgz#7a7ca895d5e549b70e4f14964436cca46f5fbb61"
+  integrity sha512-9AJ4NbuwGDexxMCZXZyKdNQhbAe93p6C6IezQaDaWmdCqZHMHmC3+ul7pGefBQfOooSarGwIf8Bn182o9SMa1A==
+  dependencies:
+    "@dnd-kit/abstract" "^0.1.21"
+    "@dnd-kit/geometry" "^0.1.21"
+    tslib "^2.6.2"
+
+"@dnd-kit/dom@^0.1.21":
+  version "0.1.21"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/dom/-/dom-0.1.21.tgz#617a4579225e8db6310bf1c0cbab7b8edc66bea1"
+  integrity sha512-6UDc1y2Y3oLQKArGlgCrZxz5pdEjRSiQujXOn5JdbuWvKqTdUR5RTYDeicr+y2sVm3liXjTqs3WlUoV+eqhqUQ==
+  dependencies:
+    "@dnd-kit/abstract" "^0.1.21"
+    "@dnd-kit/collision" "^0.1.21"
+    "@dnd-kit/geometry" "^0.1.21"
+    "@dnd-kit/state" "^0.1.21"
+    tslib "^2.6.2"
+
+"@dnd-kit/geometry@^0.1.21":
+  version "0.1.21"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/geometry/-/geometry-0.1.21.tgz#530ba0c0bac05d33689e22d9b324a27e4831ae1b"
+  integrity sha512-Tir97wNJbopN2HgkD7AjAcoB3vvrVuUHvwdPALmNDUH0fWR637c4MKQ66YjjZAbUEAR8KL6mlDiHH4MzTLd7CQ==
+  dependencies:
+    "@dnd-kit/state" "^0.1.21"
+    tslib "^2.6.2"
+
+"@dnd-kit/state@^0.1.21":
+  version "0.1.21"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/state/-/state-0.1.21.tgz#415ce01ce720e262b8a879831a09f4406a4cb643"
+  integrity sha512-pdhntEPvn/QttcF295bOJpWiLsRqA/Iczh1ODOJUxGiR+E4GkYVz9VapNNm9gDq6ST0tr/e1Q2xBztUHlJqQgA==
+  dependencies:
+    "@preact/signals-core" "^1.10.0"
+    tslib "^2.6.2"
+
 "@emnapi/core@^1.4.3", "@emnapi/core@^1.4.5":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@emnapi/core/-/core-1.5.0.tgz#85cd84537ec989cebb2343606a1ee663ce4edaf0"
@@ -442,10 +487,10 @@
   resolved "https://registry.yarnpkg.com/@levischuck/tiny-cbor/-/tiny-cbor-0.2.11.tgz#833ddf7f3627dcb62d855d9c184061b4a1a875b3"
   integrity sha512-llBRm4dT4Z89aRsm6u2oEZ8tfwL/2l6BwpZ7JcyieouniDECM5AqNgr/y08zalEIvW3RSK4upYyybDcmjXqAow==
 
-"@lucide/svelte@^0.543.0":
-  version "0.543.0"
-  resolved "https://registry.yarnpkg.com/@lucide/svelte/-/svelte-0.543.0.tgz#3d0864cd685f4b9974680fae37a517a16bea00a9"
-  integrity sha512-V9XJLRuC5pq9o4OuoMlGwdKwBClZyJnygRf9BaiJuetiptWAybQHvMoXDBm5wy+zZFgZb6LIaO/3HIvHF7/2NA==
+"@lucide/svelte@^0.544.0":
+  version "0.544.0"
+  resolved "https://registry.yarnpkg.com/@lucide/svelte/-/svelte-0.544.0.tgz#567aff4744be52c642dc978a4594c90fba816099"
+  integrity sha512-9f9O6uxng2pLB01sxNySHduJN3HTl5p0HDu4H26VR51vhZfiMzyOMe9Mhof3XAk4l813eTtl+/DYRvGyoRR+yw==
 
 "@napi-rs/wasm-runtime@^0.2.12":
   version "0.2.12"
@@ -461,10 +506,22 @@
   resolved "https://registry.yarnpkg.com/@noble/ciphers/-/ciphers-2.0.0.tgz#2d3044c63f1885aa25d02311d8d6a8ffe1f8f536"
   integrity sha512-j/l6jpnpaIBM87cAYPJzi/6TgqmBv9spkqPyCXvRYsu5uxqh6tPJZDnD85yo8VWqzTuTQPgfv7NgT63u7kbwAQ==
 
+"@noble/hashes@^1.1.5":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.8.0.tgz#cee43d801fcef9644b11b8194857695acd5f815a"
+  integrity sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==
+
 "@noble/hashes@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-2.0.0.tgz#5c39388259a0868cadb17d688cd8cf07eae344a4"
   integrity sha512-h8VUBlE8R42+XIDO229cgisD287im3kdY6nbNZJFjc6ZvKIXPYXe6Vc/t+kyjFdMFyt5JpapzTsEg8n63w5/lw==
+
+"@paralleldrive/cuid2@^2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@paralleldrive/cuid2/-/cuid2-2.2.2.tgz#7f91364d53b89e2c9cb9e02e8dd0f129e834455f"
+  integrity sha512-ZOBkgDwEdoYVlSeRbYYXs0S9MejQofiVYoTbKzy/6GQa39/q5tQU2IX46+shYnUkpEl3wc+J6wRlar7r2EK2xA==
+  dependencies:
+    "@noble/hashes" "^1.1.5"
 
 "@peculiar/asn1-android@^2.3.10":
   version "2.5.0"
@@ -518,6 +575,11 @@
   version "1.0.0-next.29"
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.29.tgz#5a40109a1ab5f84d6fd8fc928b19f367cbe7e7b1"
   integrity sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==
+
+"@preact/signals-core@^1.10.0":
+  version "1.12.1"
+  resolved "https://registry.yarnpkg.com/@preact/signals-core/-/signals-core-1.12.1.tgz#714b489bb35d9874cc44b35706a9dc27da8d21c4"
+  integrity sha512-BwbTXpj+9QutoZLQvbttRg5x3l5468qaV2kufh+51yha1c53ep5dY4kTuZR35+3pAZxpfQerGJiQqg34ZNZ6uA==
 
 "@rollup/rollup-android-arm-eabi@4.50.1":
   version "4.50.1"
@@ -890,16 +952,16 @@ better-call@1.0.18:
     set-cookie-parser "^2.7.1"
     uncrypto "^0.1.3"
 
-bits-ui@^2.8.6:
-  version "2.9.6"
-  resolved "https://registry.yarnpkg.com/bits-ui/-/bits-ui-2.9.6.tgz#2dd7cc84f4a6a8f451c0641d18a8e74c554c4700"
-  integrity sha512-OzHktsQRsIz/hIMk5VwHo96Wpp/KY68q/ebUPUzTbvuFBrALB/X+QvO4KLgdczj5dfb3xHs9zpWq8yMH8ZbZlA==
+bits-ui@^2.11.0:
+  version "2.11.4"
+  resolved "https://registry.yarnpkg.com/bits-ui/-/bits-ui-2.11.4.tgz#88ae37212f4381f36e8ddeef131d72bdc4001bca"
+  integrity sha512-OlVBJhNUMDHbIAf8oDAyPchIrU8b1S5NAMm6enMZSKx5HKcf/QPI485/BL1r4EPlv4O3m45e59hBRCETtYFdxg==
   dependencies:
     "@floating-ui/core" "^1.7.1"
     "@floating-ui/dom" "^1.7.1"
     esm-env "^1.1.2"
-    runed "^0.29.1"
-    svelte-toolbelt "^0.9.3"
+    runed "^0.31.1"
+    svelte-toolbelt "^0.10.4"
     tabbable "^6.2.0"
 
 chokidar@^4.0.1:
@@ -1130,6 +1192,11 @@ magic-string@^0.30.11, magic-string@^0.30.17, magic-string@^0.30.18, magic-strin
   dependencies:
     "@jridgewell/sourcemap-codec" "^1.5.5"
 
+media-query-parser@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/media-query-parser/-/media-query-parser-3.0.2.tgz#9006260a81bd215881fb4063643a9390db13bafe"
+  integrity sha512-3WLXSFQZVuo1d9xpt72Ul0khXy72qgtz1KqDBO6KbmyvMsBsQRcePhYYR2U5QBSOz/u5pb5zj2s2FmgJe8jaTw==
+
 minipass@^7.0.4, minipass@^7.1.2:
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/minipass/-/minipass-7.1.2.tgz#93a9626ce5e5e66bd4db86849e7515e92340a707"
@@ -1179,6 +1246,11 @@ nanostores@^0.11.4:
   version "0.11.4"
   resolved "https://registry.yarnpkg.com/nanostores/-/nanostores-0.11.4.tgz#4ed323f7b2cbbf0342c2d6be3a0c833dab73af34"
   integrity sha512-k1oiVNN4hDK8NcNERSZLQiMfRzEGtfnvZvdBvey3SQbgn8Dcrk0h1I6vpxApjb10PFUflZrgJ2WEZyJQ+5v7YQ==
+
+path-to-regexp@^8.3.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-8.3.0.tgz#aa818a6981f99321003a08987d3cec9c3474cd1f"
+  integrity sha512-7jdwVIRtsP8MYpdXSwOS0YdD0Du+qOoF/AEPIt88PcCFrZCzx41oxku1jD88hZBwbNUIEfpqvuhjFaMAqMTWnA==
 
 picocolors@^1.0.0, picocolors@^1.1.1:
   version "1.1.1"
@@ -1272,10 +1344,17 @@ runed@^0.28.0:
   dependencies:
     esm-env "^1.0.0"
 
-runed@^0.29.0, runed@^0.29.1:
+runed@^0.29.0:
   version "0.29.2"
   resolved "https://registry.yarnpkg.com/runed/-/runed-0.29.2.tgz#708e4ee7df59c4f1b91240a43219c4d3cbe9e7c6"
   integrity sha512-0cq6cA6sYGZwl/FvVqjx9YN+1xEBu9sDDyuWdDW1yWX7JF2wmvmVKfH+hVCZs+csW+P3ARH92MjI3H9QTagOQA==
+  dependencies:
+    esm-env "^1.0.0"
+
+runed@^0.31.1:
+  version "0.31.1"
+  resolved "https://registry.yarnpkg.com/runed/-/runed-0.31.1.tgz#9b92036c89f621b71bf8b258f8d58315b0cc360d"
+  integrity sha512-v3czcTnO+EJjiPvD4dwIqfTdHLZ8oH0zJheKqAHh9QMViY7Qb29UlAMRpX7ZtHh7AFqV60KmfxaJ9QMy+L1igQ==
   dependencies:
     esm-env "^1.0.0"
 
@@ -1330,6 +1409,15 @@ svelte-sonner@^1.0.5:
   dependencies:
     runed "^0.28.0"
 
+svelte-toolbelt@^0.10.4:
+  version "0.10.5"
+  resolved "https://registry.yarnpkg.com/svelte-toolbelt/-/svelte-toolbelt-0.10.5.tgz#f6d499a15d58d6599eb177de595e633cc2c79532"
+  integrity sha512-8e+eWTgxw1aiLxhDE8Rb1X6AoLitqpJz+WhAul2W7W58C8KoLoJQf1TgQdFPBiCPJ0Jg5y0Zi1uyua9em4VS0w==
+  dependencies:
+    clsx "^2.1.1"
+    runed "^0.29.0"
+    style-to-object "^1.0.8"
+
 svelte-toolbelt@^0.7.1:
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/svelte-toolbelt/-/svelte-toolbelt-0.7.1.tgz#63e9c6629456a1a0dd57812f85426e4631fd754e"
@@ -1337,15 +1425,6 @@ svelte-toolbelt@^0.7.1:
   dependencies:
     clsx "^2.1.1"
     runed "^0.23.2"
-    style-to-object "^1.0.8"
-
-svelte-toolbelt@^0.9.3:
-  version "0.9.3"
-  resolved "https://registry.yarnpkg.com/svelte-toolbelt/-/svelte-toolbelt-0.9.3.tgz#e790e09a55b405445ab855ba2796b16a5cc0c7a8"
-  integrity sha512-HCSWxCtVmv+c6g1ACb8LTwHVbDqLKJvHpo6J8TaqwUme2hj9ATJCpjCPNISR1OCq2Q4U1KT41if9ON0isINQZw==
-  dependencies:
-    clsx "^2.1.1"
-    runed "^0.29.0"
     style-to-object "^1.0.8"
 
 svelte@^5.0.0:
@@ -1425,7 +1504,7 @@ totalist@^3.0.0:
   resolved "https://registry.yarnpkg.com/totalist/-/totalist-3.0.1.tgz#ba3a3d600c915b1a97872348f79c127475f6acf8"
   integrity sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==
 
-tslib@^2.4.0, tslib@^2.8.0, tslib@^2.8.1:
+tslib@^2.4.0, tslib@^2.6.2, tslib@^2.8.0, tslib@^2.8.1:
   version "2.8.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.8.1.tgz#612efe4ed235d567e8aba5f2a5fab70280ade83f"
   integrity sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==

@@ -6,7 +6,7 @@
     const session = authClient.useSession();
 </script>
 
-{#if !$session.isPending}
+{#if !$session.isPending && !$session.isRefetching}
     {#if $session.data}
         {@render children?.()}
     {:else}
