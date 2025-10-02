@@ -1,15 +1,20 @@
 <script lang="ts" module>
     import { cn, type WithElementRef } from "$lib/utils.js";
-    import type { HTMLAnchorAttributes, HTMLButtonAttributes } from "svelte/elements";
+    import type {
+        HTMLAnchorAttributes,
+        HTMLButtonAttributes,
+    } from "svelte/elements";
     import { type VariantProps, tv } from "tailwind-variants";
 
     export const boldButtonVariants = tv({
         base: "rounded-full transition-all duration-100 font-medium px-8 py-3 not-disabled:cursor-pointer disabled:bg-[#D3D3D3] disabled:text-[#9F9F9F]",
         variants: {
             variant: {
-                default: "c-shadow bg-c-light-gold [--color:var(--color-c-light-gold)]",
+                default:
+                    "c-shadow bg-c-light-gold [--color:var(--color-c-light-gold)]",
                 dark: "c-shadow bg-[#333330] [--color:#191810] not-disabled:text-white",
-                outline: "border-2 border-[#A9A9A9] not-disabled:hover:border-[#878787]",
+                outline:
+                    "border-2 border-[#A9A9A9] not-disabled:hover:border-[#878787]",
             },
             size: {
                 default: "",
@@ -21,8 +26,12 @@
         },
     });
 
-    export type BoldButtonVariant = VariantProps<typeof boldButtonVariants>["variant"];
-    export type BoldButtonSize = VariantProps<typeof boldButtonVariants>["size"];
+    export type BoldButtonVariant = VariantProps<
+        typeof boldButtonVariants
+    >["variant"];
+    export type BoldButtonSize = VariantProps<
+        typeof boldButtonVariants
+    >["size"];
 
     export type BoldButtonProps = WithElementRef<HTMLButtonAttributes> &
         WithElementRef<HTMLAnchorAttributes> & {
@@ -62,7 +71,9 @@
                 href={disabled ? undefined : href}
                 tabindex={disabled ? -1 : undefined}
             >
-                <div class={cn(boldButtonVariants({ variant, size }), className)}>
+                <div
+                    class={cn(boldButtonVariants({ variant, size }), className)}
+                >
                     {@render children?.()}
                 </div>
             </a>

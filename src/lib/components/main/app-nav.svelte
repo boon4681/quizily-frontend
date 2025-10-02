@@ -5,7 +5,7 @@
     const session = authClient.useSession();
 </script>
 
-<div class="mx-auto max-w-5xl relative">
+<div class="mx-auto max-w-5xl relative w-full">
     <div class="flex justify-between pt-4 pb-3 px-4">
         <a class="w-[115px]" href="/"><Logo></Logo></a>
         <AppUserProfile></AppUserProfile>
