@@ -14,23 +14,27 @@
     import { randiman, SHAPE_COLORS } from "../avaaataaar";
     import { BACKGROUND_COLORS } from "../avaaataaar/map";
     import type { Question } from ".";
+    import Button from "$lib/components/ui/button/button.svelte";
     const session = authClient.useSession();
 
     let {
         questions,
+        title,
         active = $bindable(),
         sidebar,
         ...props
     }: {
         questions?: Array<Question>;
         active?: string;
+        title?: string;
         children?: Snippet;
         sidebar?: Snippet;
+        header?: Snippet;
     } = $props();
 
-    const data: Record<string, Array<Question>> = {
+    let data = $derived<Record<string, Array<Question>>>({
         Questions: questions ?? [],
-    };
+    });
 
     let isActive = $derived<Question | undefined>(
         (questions ?? []).find((a) => a.id == active),
@@ -136,28 +140,32 @@
                 </div>
             </Sidebar.Content>
         </Sidebar.Root>
-        <Sidebar.Inset>
+        <Sidebar.Inset class="overflow-x-hidden">
             <header
-                class="flex bg-sidebar h-16 shrink-0 items-center gap-2 border-b px-4"
+                class="flex bg-sidebar h-16 shrink-0 items-center gap-2 border-b px-4 overflow-hidden w-full"
             >
                 <Sidebar.Trigger class="-ml-1" />
                 <Separator orientation="vertical" class="mr-2 h-4" />
-                <Breadcrumb.Root>
+                <Breadcrumb.Root
+                    class="max-w-[70%] min-w-0 w-full overflow-hidden"
+                >
                     <Breadcrumb.List>
                         <Breadcrumb.Item class="hidden md:block">
                             <Breadcrumb.Link href="/">Quiz</Breadcrumb.Link>
                         </Breadcrumb.Item>
                         <Breadcrumb.Separator class="hidden md:block" />
                         <Breadcrumb.Item>
-                            <Breadcrumb.Page>
+                            <Breadcrumb.Page
+                                class="w-full max-w-[120px] lg:max-w-[400px] overflow-hidden text-ellipsis whitespace-nowrap"
+                            >
                                 <!-- TODO -->
-                                Japanese Vocab for beginner
+                                {title}
                             </Breadcrumb.Page>
                         </Breadcrumb.Item>
                     </Breadcrumb.List>
                 </Breadcrumb.Root>
                 <div class="ml-auto"></div>
-                <AppUserProfile></AppUserProfile>
+                {@render props.header?.()}
             </header>
             <div class="flex flex-1 flex-col gap-4 p-4">
                 {@render props.children?.()}

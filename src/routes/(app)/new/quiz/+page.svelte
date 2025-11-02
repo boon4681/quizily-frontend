@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { goto } from "$app/navigation";
     import BoldButton from "$lib/components/main/bold-button.svelte";
     import { BoldRadioGroup } from "$lib/components/main/bold-radio-group";
     import Cat from "$lib/components/main/cat.svelte";
@@ -9,23 +10,62 @@
     import Input from "$lib/components/ui/input/input.svelte";
     import { Label } from "$lib/components/ui/label";
     import { Progress } from "$lib/components/ui/progress";
+    import Spinner from "$lib/components/ui/spinner/spinner.svelte";
     import { Textarea } from "$lib/components/ui/textarea";
     import ChevronLeft from "@lucide/svelte/icons/chevron-left";
     import Upload from "@lucide/svelte/icons/upload";
+    import {
+        createMutation,
+        createQuery,
+        useQueryClient,
+    } from "@tanstack/svelte-query";
+    const client = useQueryClient();
 
-    let step = $state(2);
+    let step = $state(0);
 
     let type = $state("");
-    let count = $state("");
+    let amount = $state("");
     let resource_type = $state("document");
     let content = $state("");
+    let list = $state<File[]>([]);
+
+    let create_quiz = createMutation(() => ({
+        enabled: false,
+        mutationKey: ["quiz", "create"],
+        mutationFn: async () => {
+            const form = new FormData();
+            for (const file of list) {
+                form.append("files", file);
+            }
+            form.append("type", type);
+            form.append("amount", amount);
+            form.append("resource_type", resource_type);
+            return await fetch("/api/quiz/create", {
+                method: "POST",
+                body: form,
+            })
+                .then((r) => r.json())
+                .then((a) => {
+                    if ("data" in a) {
+                        return a["data"];
+                    }
+                    throw new Error(JSON.stringify(a));
+                });
+        },
+        retry: 0,
+        onSuccess() {
+            goto("/");
+        },
+    }));
 
     function is_disable(step: number) {
         switch (step) {
             case 0:
                 return type.length == 0;
             case 1:
-                return +count == 0;
+                return +amount == 0;
+            case 2:
+                return list.length == 0;
         }
         return true;
     }
@@ -39,66 +79,69 @@
     </Button>
     <div class="flex gap-1 flex-col w-full items-center px-8 sm:px-0">
         <div>Create your quiz</div>
-        <Progress value={step + 0.2} max={4} class="w-full max-w-[440px]" />
+        <Progress value={step + 0.2} max={3} class="w-full max-w-[440px]" />
     </div>
 </header>
-<div
-    class="relative max-w-[440px] px-4 w-full mx-auto flex items-center justify-center pt-4"
->
-    <Cat class="size-32 -ml-8 [--cat-outline:#f5f3ef] [--cat:#4F69E6]"></Cat>
-    <div class="relative w-full">
-        <div
-            class="relative border-2 border-emerald-500/60 bg-green-50 w-full p-4 rounded-md"
-        >
-            {#if step == 0}
-                What’s your prefer type of questions?
-            {/if}
-            {#if step == 1}
-                What’s amount of question do you prefer?
-            {/if}
-            {#if step == 2}
-                Provide Topic and Upload your document
-            {/if}
-        </div>
-        <div class="absolute w-2 h-4 overflow-hidden -left-1.5 top-4">
+
+{#if step < 3}
+    <div
+        class="relative max-w-[440px] px-4 w-full mx-auto flex items-center justify-center pt-4"
+    >
+        <Cat class="size-32 -ml-8 [--cat-outline:#f5f3ef] [--cat:#4F69E6]"
+        ></Cat>
+        <div class="relative w-full">
             <div
-                class="absolute left-1 size-4 rotate-45 border-2 border-emerald-500/60 bg-green-50"
-            ></div>
+                class="relative border-2 border-emerald-500/60 bg-green-50 w-full p-4 rounded-md"
+            >
+                {#if step == 0}
+                    What’s your prefer type of questions?
+                {/if}
+                {#if step == 1}
+                    What’s amount of question do you prefer?
+                {/if}
+                {#if step == 2}
+                    Provide Topic and Upload your document
+                {/if}
+            </div>
+            <div class="absolute w-2 h-4 overflow-hidden -left-1.5 top-4">
+                <div
+                    class="absolute left-1 size-4 rotate-45 border-2 border-emerald-500/60 bg-green-50"
+                ></div>
+            </div>
         </div>
     </div>
-</div>
-{#if step == 0}
-    <BoldRadioGroup.Root
-        bind:value={type}
-        class="relative max-w-[440px] w-full mx-auto pt-4 px-4"
-    >
-        <BoldRadioGroup.Item value="binary">
-            <div>True / False</div>
-        </BoldRadioGroup.Item>
-        <BoldRadioGroup.Item value="multiple">
-            <div>Multiple choice</div>
-        </BoldRadioGroup.Item>
-    </BoldRadioGroup.Root>
-{/if}
-{#if step == 1}
-    <BoldRadioGroup.Root
-        bind:value={count}
-        class="relative max-w-[440px] w-full mx-auto pt-4 px-4"
-    >
-        <BoldRadioGroup.Item value="10">
-            <div>10</div>
-        </BoldRadioGroup.Item>
-        <BoldRadioGroup.Item value="20">
-            <div>20</div>
-        </BoldRadioGroup.Item>
-        <BoldRadioGroup.Item value="30">
-            <div>30</div>
-        </BoldRadioGroup.Item>
-    </BoldRadioGroup.Root>
-{/if}
-{#if step == 2}
-    <div class="relative max-w-[440px] w-full mx-auto pt-4 px-4 space-y-4">
-        <!-- <div class="grid w-full gap-1.5">
+    {#if step == 0}
+        <BoldRadioGroup.Root
+            bind:value={type}
+            class="relative max-w-[440px] w-full mx-auto pt-4 px-4"
+        >
+            <BoldRadioGroup.Item value="binary">
+                <div>True / False</div>
+            </BoldRadioGroup.Item>
+            <BoldRadioGroup.Item value="multiple">
+                <div>Multiple choice</div>
+            </BoldRadioGroup.Item>
+        </BoldRadioGroup.Root>
+    {/if}
+    {#if step == 1}
+        <BoldRadioGroup.Root
+            bind:value={amount}
+            class="relative max-w-[440px] w-full mx-auto pt-4 px-4"
+        >
+            <BoldRadioGroup.Item value="10">
+                <div>10</div>
+            </BoldRadioGroup.Item>
+            <BoldRadioGroup.Item value="20">
+                <div>20</div>
+            </BoldRadioGroup.Item>
+            <BoldRadioGroup.Item value="30">
+                <div>30</div>
+            </BoldRadioGroup.Item>
+        </BoldRadioGroup.Root>
+    {/if}
+    {#if step == 2}
+        <div class="relative max-w-[440px] w-full mx-auto pt-4 px-4 space-y-4">
+            <!-- <div class="grid w-full gap-1.5">
             <Label for="topic">Topic</Label>
             <Textarea
                 id="topic"
@@ -106,50 +149,58 @@
                 placeholder="Write your topics....."
             />
         </div> -->
-        <BoldRadioGroup.Root bind:value={resource_type} class="flex">
-            <BoldRadioGroup.Item class="text-sm min-h-12" value="text">
-                {#snippet children(props)}
-                    <BoldRadioGroup.Dot {...props}></BoldRadioGroup.Dot>
-                    <div>Generate From Text</div>
-                {/snippet}
-            </BoldRadioGroup.Item>
-            <BoldRadioGroup.Item class="text-sm min-h-12" value="document">
-                {#snippet children(props)}
-                    <BoldRadioGroup.Dot {...props}></BoldRadioGroup.Dot>
-                    <div>Generate From Document</div>
-                {/snippet}
-            </BoldRadioGroup.Item>
-        </BoldRadioGroup.Root>
-        {#if resource_type == "text"}
-            <div class="grid w-full gap-1.5">
-                <Label for="content">Content</Label>
-                <Textarea
-                    id="content"
-                    bind:value={content}
-                    class="border-2"
-                    placeholder="Write content that you want to emphasize...."
-                />
-            </div>
-        {/if}
-        {#if resource_type == "document"}
-            <div class="grid w-full gap-1.5">
-                <Label for="content">Documents</Label>
-                <FileListInput></FileListInput>
-            </div>
-        {/if}
-    </div>
-{/if}
+            <BoldRadioGroup.Root bind:value={resource_type} class="flex">
+                <BoldRadioGroup.Item class="text-sm min-h-12" value="text">
+                    {#snippet children(props)}
+                        <BoldRadioGroup.Dot {...props}></BoldRadioGroup.Dot>
+                        <div>Generate From Text</div>
+                    {/snippet}
+                </BoldRadioGroup.Item>
+                <BoldRadioGroup.Item class="text-sm min-h-12" value="document">
+                    {#snippet children(props)}
+                        <BoldRadioGroup.Dot {...props}></BoldRadioGroup.Dot>
+                        <div>Generate From Document</div>
+                    {/snippet}
+                </BoldRadioGroup.Item>
+            </BoldRadioGroup.Root>
+            {#if resource_type == "text"}
+                <div class="grid w-full gap-1.5">
+                    <Label for="content">Content</Label>
+                    <Textarea
+                        id="content"
+                        bind:value={content}
+                        class="border-2"
+                        placeholder="Write content that you want to emphasize...."
+                    />
+                </div>
+            {/if}
+            {#if resource_type == "document"}
+                <div class="grid w-full gap-1.5">
+                    <Label for="content">Documents</Label>
+                    <FileListInput bind:list></FileListInput>
+                </div>
+            {/if}
+        </div>
+    {/if}
 
-<div class="h-20 mt-10"></div>
-<div
-    class="border-t-2 flex items-center justify-center px-4 border-neutral-300 h-20 fixed bg-background bottom-0 w-full"
->
-    <BoldButton
-        variant="dark"
-        disabled={is_disable(step)}
-        class="min-w-[200px]"
-        onclick={() => step++}
+    <div class="h-20 mt-10"></div>
+    <div
+        class="border-t-2 flex items-center justify-center px-4 border-neutral-300 h-20 fixed bg-background bottom-0 w-full"
     >
-        Continue
-    </BoldButton>
-</div>
+        <BoldButton
+            variant="dark"
+            disabled={is_disable(step)}
+            class="min-w-[200px]"
+            onclick={() => {
+                step++;
+                if (step == 3) {
+                    create_quiz.mutate();
+                }
+            }}
+        >
+            Continue
+        </BoldButton>
+    </div>
+{:else}
+    <Spinner></Spinner>
+{/if}

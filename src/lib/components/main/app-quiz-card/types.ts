@@ -7,5 +7,7 @@ export interface QuizCardCategory {
 export interface QuizCardProps {
     id: string
     title: string
+    state: string
     categories?: QuizCardCategory[]
+    ondelete?: (id: string) => void
 }

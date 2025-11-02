@@ -23,7 +23,7 @@
 
 <Label
     class={cn(
-        "border-2 cursor-pointer hover:border-neutral-500 transition-all min-h-20 text-lg flex items-center hover:ring-blue-400 border-neutral-400 shadow-sm gap-3 rounded-lg p-3 has-[[aria-checked=true]]:border-[#7A90F7] has-[[aria-checked=true]]:bg-[#EDF0FE]",
+        "border-2 relative cursor-pointer hover:border-neutral-500 transition-all min-h-20 text-lg flex items-center hover:ring-blue-400 border-neutral-400 shadow-sm gap-3 rounded-lg p-3 has-[[aria-checked=true]]:border-[#7A90F7] has-[[aria-checked=true]]:bg-[#EDF0FE]",
         className,
     )}
 >

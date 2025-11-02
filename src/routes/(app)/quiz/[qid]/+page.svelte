@@ -2,7 +2,11 @@
     import type {
         Question,
         QuestionChoice,
+        Quiz,
+        QuizWithQuestions,
     } from "$lib/components/main/quiz-layout";
+    import * as InputGroup from "$lib/components/ui/input-group/index.js";
+    import { UseClipboard } from "$lib/hooks/use-clipboard.svelte.js";
     import QuizLayout from "$lib/components/main/quiz-layout/quiz-layout.svelte";
     import { Card } from "$lib/components/ui/card";
     import Textarea from "$lib/components/ui/textarea/textarea.svelte";
@@ -18,45 +22,111 @@
     } from "$lib/components/ui/button/button.svelte";
     import Plus from "@lucide/svelte/icons/plus";
     import EllipsisVertical from "@lucide/svelte/icons/ellipsis-vertical";
+    import Save from "@lucide/svelte/icons/save";
+    import SaveOff from "@lucide/svelte/icons/save-off";
     import * as Dialog from "$lib/components/ui/dialog/index.js";
     import { Input } from "$lib/components/ui/input";
     import { getTypeName } from "$lib/utils/get-type-name";
+    import Play from "@lucide/svelte/icons/play";
+    import CheckIcon from "@lucide/svelte/icons/check";
+    import CopyIcon from "@lucide/svelte/icons/copy";
+    import Share2Icon from "@lucide/svelte/icons/share-2";
+    import { cn } from "$lib/utils";
+    import { page } from "$app/state";
+    import {
+        createMutation,
+        createQuery,
+        useQueryClient,
+    } from "@tanstack/svelte-query";
+    import { debounce } from "@tanstack/pacer";
+    import { Spinner } from "$lib/components/ui/spinner";
+    import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
+    import BoldButton from "$lib/components/main/bold-button.svelte";
+    const client = useQueryClient();
+    const clipboard = new UseClipboard();
+    const quiz = createQuery<QuizWithQuestions>(() => ({
+        queryKey: ["quiz", page.params.qid],
+        queryFn: async () =>
+            await fetch("/api/quiz/" + page.params.qid)
+                .then((r) => r.json())
+                .then((a) => {
+                    if ("data" in a) {
+                        return a["data"];
+                    }
+                    throw new Error(JSON.stringify(a));
+                }),
+        retry: 0,
+    }));
 
-    let questions = $state<Question[]>([
-        {
-            id: "0",
-            type: "multiple",
-            title: "What does UI stand for in the context of design?",
-            choices: [
-                {
-                    id: "lxdl9kbrte2tjo4qudsyi4mv",
-                    text: "Flat Design",
-                },
-                {
-                    id: "rewvrj7pfo46cibkeeubfv56",
-                    text: "Skeuomorphic Design",
-                },
-                {
-                    id: "hzn32uv4cxphhbhu7d4ty1je",
-                    text: "Minimalist Design",
-                },
-                {
-                    id: "vwnlqv0ohk8m9si1cd9927t8",
-                    text: "Material Design",
-                },
-            ],
-            correct: "hzn32uv4cxphhbhu7d4ty1je",
-        },
-        {
-            id: "1",
-            type: "binary",
-            title: "Provide Topic and Upload your document",
-            choices: [],
-            correct: "",
-        },
-    ]);
+    let saved = $state(false);
 
-    let active = $state("0");
+    const saveMutation = createMutation(() => ({
+        mutationFn: async (value: Question[]) => {
+            const result = await fetch(`/api/quiz/${page.params.qid}/save`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    questions: value,
+                }),
+            });
+            saved = true;
+            return result;
+        },
+    }));
+    const shareMutation = createMutation(() => ({
+        mutationFn: async (share: boolean) => {
+            const result = await fetch(`/api/quiz/${page.params.qid}/share`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    share: share,
+                }),
+            });
+            return result;
+        },
+        onSuccess() {
+            client.invalidateQueries({ queryKey: ["quiz", page.params.qid] });
+        },
+        retry: 0,
+    }));
+
+    const saveDebounced = debounce(
+        () => {
+            saveMutation.mutate(questions);
+        },
+        { wait: 3000 },
+    );
+
+    const save = () => {
+        saved = false;
+        saveDebounced();
+    };
+
+    let questions = $state<Question[]>([]);
+    let active = $state("");
+    watch(
+        () => quiz.isSuccess,
+        () => {
+            questions =
+                quiz.data?.questions?.map((a) => {
+                    return {
+                        id: a.id,
+                        type:
+                            a.type == "MULTIPLE_CHOICE" ? "multiple" : "binary",
+                        title: a.title,
+                        correct: a.options.find((a) => a.isCorrect)!.id,
+                        choices: a.options,
+                    };
+                }) ?? [];
+            if (questions.length) {
+                active = questions[0].id;
+            }
+        },
+    );
 
     let activeQuestionIndex = $derived(
         questions.findIndex((a) => a.id == active),
@@ -65,7 +135,7 @@
 
     let dndOptions = $derived(
         dnd.createDnd({
-            data: questions[activeQuestionIndex]!.choices,
+            data: questions[activeQuestionIndex]?.choices ?? [],
             render: (item, l) => dnd.renderDndSnippet(choice, item),
         }),
     );
@@ -77,15 +147,17 @@
     let edit_choice_text = $state<string>("");
     let edit_choice_index = $state<number>();
 
+    // Save
     watch(
-        () => dndOptions.data,
+        () => JSON.stringify(questions),
         () => {
-            console.log(dndOptions.data);
+            save();
         },
     );
     watch(
-        () => activeQuestion.type,
+        () => activeQuestion?.type,
         () => {
+            if (!activeQuestion) return;
             if (
                 activeQuestion.type == "binary" &&
                 activeQuestion.choices.length == 0
@@ -105,59 +177,187 @@
     );
 </script>
 
-<QuizLayout bind:active {questions}>
-    {#snippet sidebar()}
-        <Button class="w-full group-data-[collapsible=icon]:size-8">
-            <Plus></Plus>
-            <div class="group-data-[collapsible=icon]:hidden">Add Question</div>
-        </Button>
-    {/snippet}
-    <div class="mx-auto max-w-5xl w-full">
-        {#if questions[activeQuestionIndex]}
-            <Card class="p-6 gap-2">
-                <div class="flex items-center">
-                    <div
-                        class="size-4 bg-black text-white text-xs rounded flex items-center justify-center"
-                    >
-                        ?
-                    </div>
-                    <div class="ml-1">Question {activeQuestionIndex + 1}</div>
-                </div>
-                <Textarea
-                    bind:value={questions[activeQuestionIndex]!.title}
-                    class="p-4 bg-neutral-200 rounded-md h-20"
-                ></Textarea>
-                <div class="flex items-center pt-3">
-                    <div class="mr-auto">
-                        <div
-                            class="border rounded-md px-4 py-1 cursor-not-allowed text-sm h-9 items-center flex"
-                        >
-                            <span class="text-neutral-500">
-                                {getTypeName(activeQuestion.type)}
-                            </span>
-                        </div>
-                    </div>
-                    {#if activeQuestion.type == "multiple"}
-                        {@render add_choice_snippet()}
-                    {/if}
-                </div>
-                <RadioGroup.Root
-                    bind:value={questions[activeQuestionIndex]!.correct}
-                    disabled
+<QuizLayout bind:active title={quiz.data?.title} {questions}>
+    {#snippet header()}
+        {#if quiz.isSuccess}
+            <Dialog.Root>
+                <Dialog.Trigger
+                    class={buttonVariants({ variant: "default", size: "icon" })}
                 >
-                    {#key activeQuestion.id}
-                        <Dnd
-                            {...dndOptions}
-                            bind:data={questions[activeQuestionIndex]!.choices}
-                        ></Dnd>
-                    {/key}
-                    {#if activeQuestion.choices.length == 0}
-                        <div class="text-neutral-400 text-sm text-center">
-                            This question has no choices
-                        </div>
+                    <Share2Icon></Share2Icon>
+                </Dialog.Trigger>
+                <Dialog.Content>
+                    <Dialog.Header>
+                        <Dialog.Title>Share "{quiz.data?.title}"</Dialog.Title>
+                    </Dialog.Header>
+                    <div class="hidden">
+                        {quiz.isLoading}
+                        {quiz.isFetching}
+                    </div>
+                    {#if !quiz.data?.share}
+                        {#if shareMutation.isPending || quiz.isFetching}
+                            <div
+                                class="w-full flex items-center justify-center my-10"
+                            >
+                                <Spinner class="size-12"></Spinner>
+                            </div>
+                        {:else if !shareMutation.isPending && !quiz.isLoading}
+                            <Button
+                                disabled={shareMutation.isPending}
+                                onclick={() => shareMutation.mutate(true)}
+                            >
+                                Enable Share
+                            </Button>
+                        {/if}
                     {/if}
-                </RadioGroup.Root>
-            </Card>
+                    {#if quiz.data?.share}
+                        {#if shareMutation.isPending || quiz.isFetching}
+                            <div
+                                class="w-full flex items-center justify-center my-10"
+                            >
+                                <Spinner class="size-12"></Spinner>
+                            </div>
+                        {:else if !shareMutation.isPending && !quiz.isLoading}
+                            <InputGroup.Root>
+                                <InputGroup.Input
+                                    value="{page.url.origin}/quiz/{quiz.data
+                                        ?.shareId}/share"
+                                    readonly
+                                />
+                                <InputGroup.Addon align="inline-end">
+                                    <InputGroup.Button
+                                        aria-label="Copy"
+                                        title="Copy"
+                                        size="icon-xs"
+                                        onclick={() =>
+                                            clipboard.copy(
+                                                `${page.url.origin}/quiz/${
+                                                    quiz.data?.shareId
+                                                }/share`,
+                                            )}
+                                    >
+                                        {#if clipboard.copied}
+                                            <CheckIcon />
+                                        {:else}
+                                            <CopyIcon />
+                                        {/if}
+                                    </InputGroup.Button>
+                                </InputGroup.Addon>
+                            </InputGroup.Root>
+                            <Button
+                                disabled={shareMutation.isPending}
+                                onclick={() => shareMutation.mutate(false)}
+                            >
+                                Disable Share
+                            </Button>
+                        {/if}
+                    {/if}
+                </Dialog.Content>
+            </Dialog.Root>
+            <Button href="/quiz/{page.params.qid}/preview">
+                <Play></Play>
+                Preview
+            </Button>
+        {:else}
+            <Skeleton class="h-9 w-[120px]"></Skeleton>
+        {/if}
+    {/snippet}
+    {#snippet sidebar()}
+        <!-- {@render add_question()} -->
+    {/snippet}
+    <div class="text-sm">
+        {#if quiz.isSuccess}
+            {#if saveMutation.isPending}
+                <div class="flex gap-2">
+                    <Save class="size-5"></Save>
+                    Saving...
+                </div>
+            {:else if saved}
+                <div class="flex gap-2">
+                    <Save class="size-5"></Save>
+                    Saved
+                </div>
+            {:else if !saved}
+                <div class="flex gap-2">
+                    <SaveOff class="size-5"></SaveOff>
+                    Unsaved
+                </div>
+            {/if}
+        {/if}
+    </div>
+    <div class="mx-auto max-w-5xl w-full">
+        {#if quiz.isSuccess}
+            {#if questions[activeQuestionIndex]}
+                <Card class="gap-2 rounded-none -mx-4 md:mx-0 p-4 md:p-6">
+                    <div class="flex items-center">
+                        <div
+                            class="size-4 bg-black text-white text-xs rounded flex items-center justify-center"
+                        >
+                            ?
+                        </div>
+                        <div class="ml-1">
+                            Question {activeQuestionIndex + 1}
+                        </div>
+                    </div>
+                    <Textarea
+                        bind:value={questions[activeQuestionIndex]!.title}
+                        class="p-4 bg-neutral-200 rounded-md h-20"
+                    ></Textarea>
+                    <div class="flex items-center pt-3">
+                        <div class="mr-auto">
+                            <div
+                                class="border rounded-md px-4 py-1 cursor-not-allowed text-sm h-9 items-center flex"
+                            >
+                                <span class="text-neutral-500">
+                                    {getTypeName(activeQuestion.type)}
+                                </span>
+                            </div>
+                        </div>
+                        {#if activeQuestion.type == "multiple"}
+                            {@render add_choice_snippet()}
+                        {/if}
+                    </div>
+                    <RadioGroup.Root
+                        bind:value={questions[activeQuestionIndex]!.correct}
+                        disabled
+                    >
+                        {#key activeQuestion.id}
+                            <Dnd
+                                {...dndOptions}
+                                bind:data={
+                                    questions[activeQuestionIndex]!.choices
+                                }
+                            ></Dnd>
+                        {/key}
+                        {#if activeQuestion.choices.length == 0}
+                            <div class="text-neutral-400 text-sm text-center">
+                                This question has no choices
+                            </div>
+                        {/if}
+                    </RadioGroup.Root>
+                </Card>
+            {/if}
+        {/if}
+        {#if quiz.isError}
+            {@const error = JSON.parse(quiz.error.message)}
+            <div class="mx-auto max-w-5xl w-full">
+                <div class="relative max-w-[440px] w-full mx-auto pt-4 px-4">
+                    <div class="p-4 text-white rounded my-4">
+                        <span class="text-7xl font-bold text-indigo-600"
+                            >{error.code}</span
+                        >
+                        <div class="flex text-4xl font-light text-gray-400">
+                            <div>/</div>
+                            <div class="first-letter:uppercase">
+                                {error.message}
+                            </div>
+                        </div>
+                        <BoldButton variant="dark" class="my-4" href="/"
+                            >Back to Home</BoldButton
+                        >
+                    </div>
+                </div>
+            </div>
         {/if}
     </div>
 </QuizLayout>
@@ -318,6 +518,33 @@
                 >
                     Save
                 </Button>
+            </Dialog.Footer>
+        </Dialog.Content>
+    </Dialog.Root>
+{/snippet}
+
+{#snippet add_question()}
+    <Dialog.Root>
+        <Dialog.Trigger
+            class={cn(
+                buttonVariants({ variant: "default" }),
+                "w-full group-data-[collapsible=icon]:size-8",
+            )}
+        >
+            <Plus></Plus>
+            <div class="group-data-[collapsible=icon]:hidden">Add Question</div>
+        </Dialog.Trigger>
+        <Dialog.Content class="sm:max-w-[425px]">
+            <Dialog.Header>
+                <Dialog.Title>Edit profile</Dialog.Title>
+                <Dialog.Description>
+                    Make changes to your profile here. Click save when you're
+                    done.
+                </Dialog.Description>
+            </Dialog.Header>
+            <div class="grid gap-4 py-4"></div>
+            <Dialog.Footer>
+                <Button type="submit">Save changes</Button>
             </Dialog.Footer>
         </Dialog.Content>
     </Dialog.Root>
