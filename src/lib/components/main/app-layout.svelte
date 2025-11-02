@@ -146,7 +146,7 @@
                 <div class="ml-auto"></div>
                 <AppUserProfile></AppUserProfile>
             </header>
-            <div class="flex flex-1 flex-col gap-4 p-4">
+            <div class="flex flex-1 flex-col gap-4 p-4 overflow-y-auto">
                 {@render props.children?.()}
             </div>
         </Sidebar.Inset>
