@@ -6,6 +6,7 @@
     import { FileInput } from "$lib/components/main/file-input";
     import { FileListInput } from "$lib/components/main/file-list-input";
     import { TriSlider } from "$lib/components/main/tri-slider";
+    import * as AlertDialog from "$lib/components/ui/alert-dialog";
     import Button from "$lib/components/ui/button/button.svelte";
     import Input from "$lib/components/ui/input/input.svelte";
     import { Label } from "$lib/components/ui/label";
@@ -34,8 +35,17 @@
         mutationKey: ["quiz", "create"],
         mutationFn: async () => {
             const form = new FormData();
-            for (const file of list) {
-                form.append("files", file);
+            switch (resource_type) {
+                case "document": {
+                    for (const file of list) {
+                        form.append("files", file);
+                    }
+                    break;
+                }
+                case "text": {
+                    form.append("content", content);
+                    break;
+                }
             }
             form.append("type", type);
             form.append("amount", amount);
@@ -65,7 +75,7 @@
             case 1:
                 return +amount == 0;
             case 2:
-                return list.length == 0;
+                return list.length == 0 && content.length == 0;
         }
         return true;
     }
@@ -202,5 +212,11 @@
         </BoldButton>
     </div>
 {:else}
-    <Spinner></Spinner>
+    <AlertDialog.Root open>
+        <AlertDialog.Content
+            class="bg-transparent border-none shadow-none items-center justify-center"
+        >
+            <Spinner class="size-12"></Spinner>
+        </AlertDialog.Content>
+    </AlertDialog.Root>
 {/if}
