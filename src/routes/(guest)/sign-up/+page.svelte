@@ -1,3 +1,4 @@
+
 <script lang="ts">
     import * as Card from "$lib/components/ui/card/index.js";
     import { Label } from "$lib/components/ui/label/index.js";
@@ -6,6 +7,31 @@
     import { cn } from "$lib/utils.js";
     import type { HTMLAttributes } from "svelte/elements";
     import Logo from "$lib/components/main/logo.svelte";
+    import { authClient } from "$lib/auth-client";
+    import { toast } from "svelte-sonner";
+
+    let email = $state<string>();
+    let password = $state<string>();  
+    let confirmPassword = $state<string>();
+
+    const signup = async () => {
+
+        if (password !== confirmPassword) {
+            toast.error("Passwords do not match");
+            return;
+        }
+        
+        const { data, error } = await authClient.signUp.email({
+            name: "",
+            email: email!,
+            password: password!,
+
+        });
+        if (error) {
+            toast.error(error.message ?? error.statusText);
+            return;
+        }
+    };
 </script>
 
 <div class="mx-auto max-w-5xl relative">
@@ -18,7 +44,7 @@
         <div class={cn("flex flex-col gap-6")}>
             <Card.Root class="overflow-hidden p-0">
                 <Card.Content class="grid p-0 md:grid-cols-2">
-                    <form class="p-6 md:p-8">
+                    <form class="p-6 md:p-8" onsubmit={signup}>
                         <div class="flex flex-col gap-6">
                             <div class="flex flex-col items-center text-center">
                                 <h1 class="text-2xl font-bold">Register</h1>
@@ -26,7 +52,7 @@
                             </div>
                             <div class="grid gap-3">
                                 <Label for="email">Email</Label>
-                                <Input id="email" type="email" placeholder="m@example.com" required />
+                                <Input id="email" type="email" placeholder="m@example.com" required bind:value={email} />
                             </div>
                             <div class="grid gap-3">
                                 <div class="flex items-center">
@@ -35,7 +61,7 @@
                                         Forgot your password?
                                     </a> -->
                                 </div>
-                                <Input id="password" type="password" required placeholder="***" />
+                                <Input id="password" type="password" required placeholder="***" bind:value={password} />
                             </div>
                             <div class="grid gap-3">
                                 <div class="flex items-center">
@@ -44,9 +70,9 @@
                                         Forgot your password?
                                     </a> -->
                                 </div>
-                                <Input id="confirm-password" type="password" required placeholder="Confirm password" />
+                                <Input id="confirm-password" type="password" required placeholder="Confirm password" bind:value={confirmPassword} />
                             </div>
-                            <Button type="submit" class="w-full">Login</Button>
+                            <Button type="submit" class="w-full">SignUp</Button>
                             <div
                                 class="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t"
                             >
