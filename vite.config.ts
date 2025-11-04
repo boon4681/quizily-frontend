@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
             proxy: {
                 '/api': {
                     target: isProd ? env.VITE_BACKEND ?? 'http://localhost:3000' : 'http://localhost:3000',
-                    rewrite: (p) => p.replace('/api/', '/')
+                    changeOrigin: true
                 }
             }
         },
