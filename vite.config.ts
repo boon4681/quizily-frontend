@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => {
     return {
         plugins: [tailwindcss(), sveltekit()],
         server: {
+            allowedHosts: [
+                "quizily.boon4681.com"
+            ],
             proxy: {
                 '/api': {
                     target: isProd ? env.VITE_BACKEND ?? 'http://localhost:3000' : 'http://localhost:3000',
