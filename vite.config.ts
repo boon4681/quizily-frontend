@@ -17,5 +17,8 @@ export default defineConfig(({ mode }) => {
                 }
             }
         },
+        preview: {
+            allowedHosts: true
+        }
     }
 });
